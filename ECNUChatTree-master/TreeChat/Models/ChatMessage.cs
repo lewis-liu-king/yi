@@ -1,4 +1,6 @@
-﻿namespace TreeChat.Models
+﻿using System;
+
+namespace TreeChat.Models
 {
     /// <summary>
     /// 聊天消息单元(包含角色和一条消息)
@@ -14,6 +16,16 @@
         /// 信息内容
         /// </summary>
         public string Content { get; }
+        
+        /// <summary>
+        /// 时间戳
+        /// </summary>
+        public DateTime Timestamp { get; }
+        
+        /// <summary>
+        /// 消息ID
+        /// </summary>
+        public string MessageId { get; }
 
         /// <summary>
         /// 构造函数
@@ -24,6 +36,8 @@
         {
             Role = role;
             Content = content;
+            Timestamp = DateTime.Now;
+            MessageId = Guid.NewGuid().ToString();
         }
     }
 }

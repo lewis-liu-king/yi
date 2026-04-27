@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using TreeChat.Services;
@@ -83,6 +85,26 @@ namespace TreeChat.Models
         /// Top K 参数
         /// </summary>
         public int TopK { get; set; }
+        
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime CreatedAt { get; }
+        
+        /// <summary>
+        /// 最后修改时间
+        /// </summary>
+        public DateTime LastModifiedAt { get; set; }
+        
+        /// <summary>
+        /// 标签
+        /// </summary>
+        public List<string> Tags { get; set; } = new List<string>();
+        
+        /// <summary>
+        /// 节点数量
+        /// </summary>
+        public int NodeCount => RootNode.GetSubtreeSize();
 
         /// <summary>
         /// 无参构造函数，用于JSON反序列化
@@ -91,6 +113,8 @@ namespace TreeChat.Models
         {
             RootNode = new ChatTreeNode(null, new ChatMessage("system", "你是一个有帮助的AI助手。"));
             CurrentNode = RootNode;
+            CreatedAt = DateTime.Now;
+            LastModifiedAt = DateTime.Now;
             
             // 设置默认配置
             ApiKey = ApiConfig.ApiKey;
@@ -112,6 +136,8 @@ namespace TreeChat.Models
                 RootNode = new ChatTreeNode(null, new ChatMessage("system", "你是一个有帮助的AI助手。"));
             }
             CurrentNode = RootNode;
+            CreatedAt = DateTime.Now;
+            LastModifiedAt = DateTime.Now;
             
             // 设置配置，使用传入的值或默认值
             ApiKey = apiKey ?? ApiConfig.ApiKey;
@@ -130,6 +156,17 @@ namespace TreeChat.Models
         {
             RootNode = rootNode;
             CurrentNode = rootNode;
+            LastModifiedAt = DateTime.Now;
+        }
+        
+        /// <summary>
+        /// 设置当前节点
+        /// </summary>
+        /// <param name="node">当前节点</param>
+        public void SetCurrentNode(ChatTreeNode node)
+        {
+            CurrentNode = node;
+            LastModifiedAt = DateTime.Now;
         }
 
         private ChatTreeNode? FindNodeById(ChatTreeNode startNode, int nodeID)
@@ -141,6 +178,99 @@ namespace TreeChat.Models
                 if (found != null) return found;
             }
             return null;
+        }
+        
+        /// <summary>
+        /// 根据ID查找节点
+        /// </summary>
+        /// <param name="nodeID">节点ID</param>
+        /// <returns>找到的节点</returns>
+        public ChatTreeNode? FindNodeById(int nodeID)
+        {
+            return FindNodeById(RootNode, nodeID);
+        }
+        
+        /// <summary>
+        /// 合并聊天树
+        /// </summary>
+        /// <param name="otherTree">要合并的聊天树</param>
+        public void Merge(ChatTree otherTree)
+        {
+            var clonedRoot = otherTree.RootNode.Clone(RootNode);
+            LastModifiedAt = DateTime.Now;
+        }
+        
+        /// <summary>
+        /// 克隆聊天树
+        /// </summary>
+        /// <returns>克隆的聊天树</returns>
+        public ChatTree Clone()
+        {
+            var clonedTree = new ChatTree
+            {
+                TreeTitle = TreeTitle + " (副本)",
+                ApiKey = ApiKey,
+                ApiEndpoint = ApiEndpoint,
+                ModelName = ModelName,
+                Temperature = Temperature,
+                TopP = TopP,
+                TopK = TopK,
+                Tags = new List<string>(Tags)
+            };
+            
+            var clonedRoot = RootNode.Clone();
+            clonedTree.SetRootNode(clonedRoot);
+            
+            return clonedTree;
+        }
+        
+        /// <summary>
+        /// 修剪空分支
+        /// </summary>
+        public void PruneEmptyBranches()
+        {
+            PruneNode(RootNode);
+            LastModifiedAt = DateTime.Now;
+        }
+        
+        private void PruneNode(ChatTreeNode node)
+        {
+            for (int i = node.ChildNodes.Count - 1; i >= 0; i--)
+            {
+                var child = node.ChildNodes[i];
+                if (child.ReplyMessage == null && child.ChildNodes.Count == 0)
+                {
+                    node.ChildNodes.RemoveAt(i);
+                }
+                else
+                {
+                    PruneNode(child);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 查找节点
+        /// </summary>
+        /// <param name="predicate">查找条件</param>
+        /// <returns>符合条件的节点</returns>
+        public IEnumerable<ChatTreeNode> FindNodes(Func<ChatTreeNode, bool> predicate)
+        {
+            var results = new List<ChatTreeNode>();
+            FindNodesRecursive(RootNode, predicate, results);
+            return results;
+        }
+        
+        private void FindNodesRecursive(ChatTreeNode node, Func<ChatTreeNode, bool> predicate, List<ChatTreeNode> results)
+        {
+            if (predicate(node))
+            {
+                results.Add(node);
+            }
+            foreach (var child in node.ChildNodes)
+            {
+                FindNodesRecursive(child, predicate, results);
+            }
         }
     }
 }
