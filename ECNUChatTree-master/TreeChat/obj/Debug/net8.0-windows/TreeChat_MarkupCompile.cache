@@ -1,0 +1,20 @@
+﻿TreeChat
+1.0.0.0
+
+winexe
+C#
+.cs
+c:\Users\lewis\Desktop\yi2\ECNUChatTree-master (1)\ECNUChatTree-master\TreeChat\obj\Debug\net8.0-windows\
+TreeChat
+none
+false
+TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
+c:\Users\lewis\Desktop\yi2\ECNUChatTree-master (1)\ECNUChatTree-master\TreeChat\App.xaml
+61330151815
+
+32177491858
+199-800039321
+Views\ChatInformationView.xaml;Views\ChatManagementPanel.xaml;Views\ConfigDialog.xaml;Views\MainWindow.xaml;Views\RenameDialog.xaml;Views\TreeVisualizationView.xaml;
+
+True
+
