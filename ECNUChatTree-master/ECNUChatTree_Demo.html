@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECNUChatTree 演示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1976D2',
+                        secondary: '#64B5F6',
+                        accent: '#0D47A1',
+                        neutral: '#F5F5F5',
+                        'neutral-dark': '#1E1E1E',
+                        'card-light': '#FFFFFF',
+                        'card-dark': '#252526',
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 8px rgba(0, 0, 0, 0.1)',
+                        'card-dark': '0 2px 8px rgba(0, 0, 0, 0.3)',
+                        'node': '0 1px 3px rgba(0, 0, 0, 0.12)',
+                        'node-dark': '0 1px 3px rgba(0, 0, 0, 0.3)',
+                    },
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .transition-height {
+                transition: height 0.3s ease;
+            }
+            .node-connector {
+                position: absolute;
+                background-color: #CBD5E1;
+                z-index: 0;
+            }
+            .node-connector-dark {
+                background-color: #4B5563;
+            }
+            .scrollbar-thin {
+                scrollbar-width: thin;
+            }
+            .scrollbar-thin::-webkit-scrollbar {
+                width: 6px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb {
+                background: #CBD5E1;
+                border-radius: 3px;
+            }
+            .scrollbar-thin-dark::-webkit-scrollbar-thumb {
+                background: #4B5563;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral dark:bg-neutral-dark text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white dark:bg-card-dark shadow-sm sticky top-0 z-50 transition-colors duration-300">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <i class="fa fa-sitemap text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-primary">ECNUChatTree</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" placeholder="搜索对话..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-card-dark focus:outline-none focus:ring-2 focus:ring-primary/50 w-64 transition-colors duration-300">
+                    <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
+                    <i class="fa fa-moon-o dark:hidden"></i>
+                    <i class="fa fa-sun-o hidden dark:inline-block"></i>
+                </button>
+                <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
+                    <i class="fa fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
+        <!-- 左侧对话管理面板 -->
+        <div class="lg:w-1/4 bg-white dark:bg-card-dark rounded-xl shadow-card dark:shadow-card-dark p-4 h-[calc(100vh-120px)] flex flex-col transition-colors duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">对话管理</h2>
+                <button class="bg-primary hover:bg-accent text-white px-3 py-1 rounded-lg text-sm transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fa fa-plus"></i>
+                    <span>新建对话</span>
+                </button>
+            </div>
+            
+            <!-- 对话列表 -->
+            <div class="flex-1 overflow-y-auto scrollbar-thin dark:scrollbar-thin-dark space-y-3">
+                <!-- 对话项 1 -->
+                <div class="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-300 border-l-4 border-primary">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-medium">AI助手使用指南</h3>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">今天 14:30</span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">了解如何有效地使用AI助手，包括提示工程、上下文管理等技巧...</p>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-primary rounded-full">指南</span>
+                        <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">GPT-3.5</span>
+                    </div>
+                </div>
+                
+                <!-- 对话项 2 -->
+                <div class="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-300">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-medium">项目规划讨论</h3>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">昨天 16:45</span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">讨论ECNUChatTree的功能规划，包括多模型支持、实时协作等功能...</p>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <span class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">项目</span>
+                        <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">Claude</span>
+                    </div>
+                </div>
+                
+                <!-- 对话项 3 -->
+                <div class="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-300">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-medium">学习资料整理</h3>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">2026-04-25</span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">整理机器学习相关的学习资料，包括课程、书籍、论文等资源...</p>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full">学习</span>
+                        <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">ECNU</span>
+                    </div>
+                </div>
+                
+                <!-- 对话项 4 -->
+                <div class="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-300">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-medium">旅行计划</h3>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">2026-04-23</span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">规划五一假期的旅行路线，包括目的地、交通、住宿等安排...</p>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <span class="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full">旅行</span>
+                        <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">GPT-4</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部操作区 -->
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex space-x-2">
+                    <button class="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center space-x-1">
+                        <i class="fa fa-folder-open"></i>
+                        <span class="text-sm">加载</span>
+                    </button>
+                    <button class="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center space-x-1">
+                        <i class="fa fa-download"></i>
+                        <span class="text-sm">导出</span>
+                    </button>
+                    <button class="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center space-x-1">
+                        <i class="fa fa-share-alt"></i>
+                        <span class="text-sm">分享</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中间树可视化区域 -->
+        <div class="lg:w-2/4 bg-white dark:bg-card-dark rounded-xl shadow-card dark:shadow-card-dark p-4 h-[calc(100vh-120px)] flex flex-col transition-colors duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">对话树</h2>
+                <div class="flex space-x-2">
+                    <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                    <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
+                        <i class="fa fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 树可视化区域 -->
+            <div class="flex-1 overflow-auto scrollbar-thin dark:scrollbar-thin-dark relative">
+                <div class="min-w-[800px] min-h-[600px] relative">
+                    <!-- 树节点和连接线 -->
+                    <div class="node-connector absolute top-[60px] left-[150px] w-0.5 h-[40px]"></div>
+                    <div class="node-connector absolute top-[100px] left-[150px] w-[100px] h-0.5"></div>
+                    <div class="node-connector absolute top-[140px] left-[250px] w-0.5 h-[40px]"></div>
+                    <div class="node-connector absolute top-[180px] left-[250px] w-[100px] h-0.5"></div>
+                    <div class="node-connector absolute top-[140px] left-[150px] w-[100px] h-0.5"></div>
+                    <div class="node-connector absolute top-[180px] left-[150px] w-0.5 h-[40px]"></div>
+                    <div class="node-connector absolute top-[220px] left-[150px] w-[100px] h-0.5"></div>
+                    
+                    <!-- 根节点 -->
+                    <div class="absolute top-4 left-4 w-[280px] p-3 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/30 shadow-node dark:shadow-node-dark cursor-pointer transition-all duration-300 hover:shadow-lg dark:hover:shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                <h3 class="font-medium">AI助手使用指南</h3>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <i class="fa fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">如何有效地使用AI助手？</p>
+                    </div>
+                    
+                    <!-- 子节点 1 -->
+                    <div class="absolute top-[100px] left-[200px] w-[280px] p-3 rounded-lg bg-white dark:bg-card-dark border border-gray-200 dark:border-gray-700 shadow-node dark:shadow-node-dark cursor-pointer transition-all duration-300 hover:shadow-lg dark:hover:shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                <h3 class="font-medium">提示工程技巧</h3>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <i class="fa fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">什么是提示工程？有哪些技巧？</p>
+                    </div>
+                    
+                    <!-- 子节点 2 -->
+                    <div class="absolute top-[180px] left-[350px] w-[280px] p-3 rounded-lg bg-white dark:bg-card-dark border border-gray-200 dark:border-gray-700 shadow-node dark:shadow-node-dark cursor-pointer transition-all duration-300 hover:shadow-lg dark:hover:shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                <h3 class="font-medium">上下文管理</h3>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">如何有效管理对话上下文？</p>
+                    </div>
+                    
+                    <!-- 子节点 3 -->
+                    <div class="absolute top-[180px] left-[50px] w-[280px] p-3 rounded-lg bg-white dark:bg-card-dark border border-gray-200 dark:border-gray-700 shadow-node dark:shadow-node-dark cursor-pointer transition-all duration-300 hover:shadow-lg dark:hover:shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                <h3 class="font-medium">模型选择</h3>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">不同场景如何选择合适的模型？</p>
+                    </div>
+                    
+                    <!-- 子节点 4 -->
+                    <div class="absolute top-[260px] left-[200px] w-[280px] p-3 rounded-lg bg-white dark:bg-card-dark border border-gray-200 dark:border-gray-700 shadow-node dark:shadow-node-dark cursor-pointer transition-all duration-300 hover:shadow-lg dark:hover:shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                <h3 class="font-medium">多轮对话技巧</h3>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">如何进行有效的多轮对话？</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧对话信息区 -->
+        <div class="lg:w-1/4 bg-white dark:bg-card-dark rounded-xl shadow-card dark:shadow-card-dark p-4 h-[calc(100vh-120px)] flex flex-col transition-colors duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">对话内容</h2>
+                <div class="flex space-x-2">
+                    <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
+                        <i class="fa fa-star-o"></i>
+                    </button>
+                    <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300">
+                        <i class="fa fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 对话内容区 -->
+            <div class="flex-1 overflow-y-auto scrollbar-thin dark:scrollbar-thin-dark space-y-4">
+                <!-- 用户消息 -->
+                <div class="flex space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <i class="fa fa-user text-gray-600 dark:text-gray-300"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+                            <p>如何有效地使用AI助手？</p>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">14:30</div>
+                    </div>
+                </div>
+                
+                <!-- AI消息 -->
+                <div class="flex space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                        <i class="fa fa-robot text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                            <p>有效使用AI助手的关键在于掌握提示工程技巧和上下文管理。以下是一些建议：</p>
+                            <ul class="list-disc pl-5 mt-2 space-y-1">
+                                <li>明确你的问题或请求</li>
+                                <li>提供足够的上下文信息</li>
+                                <li>使用结构化的提示格式</li>
+                                <li>针对不同任务选择合适的模型</li>
+                                <li>迭代优化你的提示</li>
+                            </ul>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">14:31</div>
+                    </div>
+                </div>
+                
+                <!-- 用户消息 -->
+                <div class="flex space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <i class="fa fa-user text-gray-600 dark:text-gray-300"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+                            <p>什么是提示工程？有哪些技巧？</p>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">14:32</div>
+                    </div>
+                </div>
+                
+                <!-- AI消息 -->
+                <div class="flex space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                        <i class="fa fa-robot text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                            <p>提示工程是指设计和优化与AI模型交互的提示，以获得最佳结果的过程。以下是一些关键技巧：</p>
+                            <ul class="list-disc pl-5 mt-2 space-y-1">
+                                <li><strong>明确具体</strong>：提供详细的指令和期望</li>
+                                <li><strong>提供上下文</strong>：包含相关背景信息</li>
+                                <li><strong>使用示例</strong>：展示期望的输出格式</li>
+                                <li><strong>指定格式</strong>：要求特定的输出格式</li>
+                                <li><strong>逐步思考</strong>：让模型分步解决问题</li>
+                                <li><strong>角色设定</strong>：为模型设定特定角色</li>
+                            </ul>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">14:33</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 智能建议 -->
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-sm font-medium mb-2">智能建议</h3>
+                <div class="space-y-2">
+                    <button class="w-full text-left p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300 text-sm">
+                        如何管理对话上下文？
+                    </button>
+                    <button class="w-full text-left p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300 text-sm">
+                        不同场景如何选择合适的模型？
+                    </button>
+                    <button class="w-full text-left p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300 text-sm">
+                        如何进行有效的多轮对话？
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 输入区域 -->
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="relative">
+                    <input type="text" placeholder="输入消息..." class="w-full pl-4 pr-12 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-card-dark focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors duration-300">
+                    <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-accent text-white p-2 rounded-lg transition-colors duration-300">
+                        <i class="fa fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div class="flex space-x-3">
+                        <button class="hover:text-primary transition-colors duration-300">
+                            <i class="fa fa-microphone mr-1"></i>语音
+                        </button>
+                        <button class="hover:text-primary transition-colors duration-300">
+                            <i class="fa fa-paperclip mr-1"></i>附件
+                        </button>
+                        <button class="hover:text-primary transition-colors duration-300">
+                            <i class="fa fa-lightbulb-o mr-1"></i>创意
+                        </button>
+                    </div>
+                    <div>
+                        <span class="text-primary">GPT-3.5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部状态栏 -->
+    <footer class="bg-white dark:bg-card-dark shadow-sm py-2 transition-colors duration-300">
+        <div class="container mx-auto px-4 flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+            <div class="flex items-center space-x-4">
+                <span>ECNUChatTree v1.0</span>
+                <span>|</span>
+                <span>在线用户: 3</span>
+                <span>|</span>
+                <span>系统状态: <span class="text-green-500">正常</span></span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="hover:text-primary transition-colors duration-300">
+                    <i class="fa fa-question-circle mr-1"></i>帮助
+                </button>
+                <button class="hover:text-primary transition-colors duration-300">
+                    <i class="fa fa-info-circle mr-1"></i>关于
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 主题切换脚本 -->
+    <script>
+        // 检查本地存储中的主题偏好
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
+        // 主题切换按钮
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark')
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.theme = 'dark'
+                // 更新连接线颜色
+                document.querySelectorAll('.node-connector').forEach(elem => {
+                    elem.classList.add('node-connector-dark')
+                })
+            } else {
+                localStorage.theme = 'light'
+                // 更新连接线颜色
+                document.querySelectorAll('.node-connector').forEach(elem => {
+                    elem.classList.remove('node-connector-dark')
+                })
+            }
+        })
+
+        // 初始化连接线颜色
+        if (document.documentElement.classList.contains('dark')) {
+            document.querySelectorAll('.node-connector').forEach(elem => {
+                elem.classList.add('node-connector-dark')
+            })
+        }
+
+        // 模拟树节点展开/折叠
+        document.querySelectorAll('.fa-chevron-down, .fa-chevron-right').forEach(icon => {
+            icon.parentElement.addEventListener('click', function(e) {
+                e.stopPropagation()
+                const icon = this.querySelector('i')
+                if (icon.classList.contains('fa-chevron-down')) {
+                    icon.classList.remove('fa-chevron-down')
+                    icon.classList.add('fa-chevron-right')
+                } else {
+                    icon.classList.remove('fa-chevron-right')
+                    icon.classList.add('fa-chevron-down')
+                }
+            })
+        })
+
+        // 模拟对话项点击
+        document.querySelectorAll('.p-3.rounded-lg').forEach(item => {
+            item.addEventListener('click', function() {
+                // 移除所有对话项的选中状态
+                document.querySelectorAll('.p-3.rounded-lg').forEach(elem => {
+                    elem.classList.remove('border-l-4', 'border-primary')
+                })
+                // 添加当前对话项的选中状态
+                this.classList.add('border-l-4', 'border-primary')
+            })
+        })
+    </script>
+</body>
+</html>
